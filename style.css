@@ -222,6 +222,82 @@ body {
 .results-label { font-size: 13px; color: var(--text-muted); }
 
 /* =========================================================
+   GENRE FILTER BAR
+   ========================================================= */
+.genre-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.genre-filter-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 7px 15px;
+    border-radius: 99px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: var(--ease);
+    user-select: none;
+    white-space: nowrap;
+}
+.genre-filter-chip svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+}
+.genre-filter-chip:hover {
+    background: rgba(127,0,255,0.12);
+    border-color: var(--border-hover);
+    color: white;
+    transform: translateY(-2px);
+}
+.genre-filter-chip.active {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 14px rgba(127,0,255,0.35);
+}
+.genre-filter-chip.active svg { stroke: white; }
+
+/* =========================================================
+   DETAILS PAGE ACTION BUTTONS ROW
+   ========================================================= */
+.details-actions-row {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center;
+    margin-top: auto;
+}
+
+/* Trailer Button */
+.trailer-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white; border: none;
+    border-radius: 99px; padding: 11px 24px;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; text-decoration: none;
+    transition: var(--ease);
+    box-shadow: 0 4px 16px rgba(255,0,0,0.3);
+    letter-spacing: 0.3px;
+}
+.trailer-btn svg {
+    width: 16px; height: 16px;
+    fill: white;
+    flex-shrink: 0;
+}
+.trailer-btn:hover {
+    background: linear-gradient(135deg, #ff2222, #ee0000);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(255,0,0,0.45);
+    color: white;
+}
+.trailer-btn:active { transform: scale(0.98); }
+
+/* =========================================================
    MOVIES TILE GRID
    ========================================================= */
 .movies-grid {

@@ -41,6 +41,7 @@ const movieCache = {};            // imdbID → full data object
 let favorites = loadFavorites();  // persisted array of lightweight favourite objects
 let currentTab = "popular";       // "popular" | "favorites"
 let popularMovies = [];           // cached popular movies array
+let activeGenre = "All";          // current genre filter
 
 /* ── Helpers ── */
 function loadFavorites() {
@@ -196,6 +197,11 @@ function switchTab(tab) {
     currentTab = tab;
     document.getElementById("tabPopular").classList.toggle("active", tab === "popular");
     document.getElementById("tabFavorites").classList.toggle("active", tab === "favorites");
+    // Reset genre filter when switching tabs
+    activeGenre = "All";
+    document.querySelectorAll(".genre-filter-chip").forEach(c => c.classList.remove("active"));
+    const allChip = document.getElementById("genreAll");
+    if (allChip) allChip.classList.add("active");
     renderCurrentTab();
 }
 
@@ -208,6 +214,55 @@ function renderCurrentTab() {
     } else {
         document.getElementById("sectionMeta").textContent = `${favorites.length} saved`;
         renderFavoritesGrid();
+    }
+}
+
+/* ── GENRE FILTER ── */
+function filterByGenre(genre) {
+    activeGenre = genre;
+
+    // Update active chip styling
+    document.querySelectorAll(".genre-filter-chip").forEach(chip => {
+        chip.classList.remove("active");
+    });
+    // Find and activate the clicked chip by matching its text content
+    document.querySelectorAll(".genre-filter-chip").forEach(chip => {
+        const chipText = chip.textContent.trim();
+        if (chipText === genre) chip.classList.add("active");
+    });
+    if (genre === "All") {
+        const allChip = document.getElementById("genreAll");
+        if (allChip) allChip.classList.add("active");
+    }
+
+    // Filter the appropriate pool
+    const pool = currentTab === "popular" ? popularMovies : favorites.map(f => ({
+        imdbID: f.imdbID, Title: f.Title, Poster: f.Poster,
+        Year: f.Year, imdbRating: f.imdbRating, Genre: f.Genre || "", Type: f.Type || "movie"
+    }));
+
+    const filtered = genre === "All"
+        ? pool
+        : pool.filter(m => m.Genre && m.Genre.toLowerCase().includes(genre.toLowerCase()));
+
+    const meta = document.getElementById("sectionMeta");
+    if (genre === "All") {
+        meta.textContent = `${pool.length} featured titles`;
+    } else {
+        meta.textContent = `${filtered.length} ${genre} film${filtered.length !== 1 ? 's' : ''}`;
+    }
+
+    if (filtered.length === 0) {
+        document.getElementById("moviesGrid").innerHTML = `
+            <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <h4>No ${genre} movies in this list</h4>
+                <p>Try a different genre or search directly for a ${genre} film.</p>
+            </div>`;
+    } else {
+        renderTiles(filtered);
     }
 }
 
@@ -451,16 +506,29 @@ async function renderDetailsPage(imdbID) {
                         </div>
                     </div>
 
-                    <!-- Favorites Button on detail page -->
-                    <button class="details-fav-btn ${favActive ? 'active' : ''}"
-                            id="detailsFavBtn"
-                            data-id="${movie.imdbID}"
-                            onclick="toggleFavFromDetails('${movie.imdbID}')">
-                        <svg viewBox="0 0 24 24">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                        <span>${favActive ? "Favorited" : "Add to Favorites"}</span>
-                    </button>
+                    <!-- Action Buttons Row -->
+                    <div class="details-actions-row">
+                        <!-- Watch Trailer Button -->
+                        <a class="trailer-btn"
+                           href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.Title + ' ' + movie.Year + ' official trailer')}"
+                           target="_blank" rel="noopener noreferrer">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            Watch Trailer
+                        </a>
+
+                        <!-- Favorites Button -->
+                        <button class="details-fav-btn ${favActive ? 'active' : ''}"
+                                id="detailsFavBtn"
+                                data-id="${movie.imdbID}"
+                                onclick="toggleFavFromDetails('${movie.imdbID}')">
+                            <svg viewBox="0 0 24 24">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            <span>${favActive ? "Favorited" : "Add to Favorites"}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
