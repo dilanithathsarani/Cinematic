@@ -125,25 +125,27 @@ async function findMovie(presetName) {
     const name = presetName || input.value.trim();
     if (!name) return;
 
-    if (presetName) input.value = presetName;
-
     // Get data via title lookup
     try {
         const data = await apiFetch({ t: encodeURIComponent(name) });
         if (data && data.Response === "True") {
             movieCache[data.imdbID] = data;
+            input.value = ""; // Clear search bar on success
             navigateToMovie(data.imdbID);
         } else {
             // If no exact match, try searching and use first result
             const searchData = await apiFetch({ s: encodeURIComponent(name) });
             if (searchData && searchData.Response === "True" && searchData.Search.length > 0) {
+                input.value = ""; // Clear search bar on success
                 navigateToMovie(searchData.Search[0].imdbID);
             } else {
+                input.value = ""; // Clear even on failure so user can try again cleanly
                 alert(`No movie found for "${name}". Try a different title.`);
             }
         }
     } catch (e) {
         console.error(e);
+        input.value = "";
         alert("Network error. Please check your connection.");
     }
 }
